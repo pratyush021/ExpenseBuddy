@@ -1,5 +1,6 @@
 package com.app.ExpenseMate.controller;
 
+import com.app.ExpenseMate.entity.Expense;
 import com.app.ExpenseMate.entity.Room;
 import com.app.ExpenseMate.entity.User;
 import com.app.ExpenseMate.processor.DatabaseOpsProcessor;
@@ -41,10 +42,20 @@ public class controller {
         return ResponseEntity.ok(room);
     }
 
-    @GetMapping("/getAll")
-    public List<Room> getAll() {
-        return databaseOpsProcessor.getAll();
+    @PostMapping("/expense")
+    public ResponseEntity<String> addExpense(
+            @RequestBody Expense expense,
+            @RequestParam(value = "roomId") String roomId
+    ) {
+        String response = databaseOpsProcessor.addExpense(expense, roomId);
+        return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/room")
+    public ResponseEntity<String> settleExpenses(
+            @RequestParam(value = "roomId") String roomId
+    ) {
+        return databaseOpsProcessor.settle(roomId);
+    }
 
 }

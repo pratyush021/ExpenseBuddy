@@ -1,17 +1,18 @@
 package com.app.ExpenseMate.processor;
 
 import ch.qos.logback.core.util.StringUtil;
+import com.app.ExpenseMate.dao.ExpenseDao;
+import com.app.ExpenseMate.dao.RoomDao;
+import com.app.ExpenseMate.entity.Expense;
 import com.app.ExpenseMate.entity.Room;
 import com.app.ExpenseMate.entity.User;
+import com.app.ExpenseMate.exception.InvalidInputException;
+import com.app.ExpenseMate.exception.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,54 +21,59 @@ import java.util.UUID;
 public class DatabaseOpsProcessor {
 
     @Autowired
-    private MongoTemplate mongoTemplate;
+    private RoomDao roomDao;
+
+    @Autowired
+    private ExpenseDao expenseDao;
+
+    public String addExpense(Expense expense, String roomId) {
+        log.info("[POST] adding expense to room {}", roomId);
+        return expense.getExpenseId();
+    }
+
 
     public Room createNewRoom(Room room) {
         log.info("[POST] adding room " + room.getRoomId() + " by " + room.getCreatedBy());
+        if(StringUtil.isNullOrEmpty(room.getRoomName())) {
+            throw new InvalidInputException("Room name can not be NULL or EMPTY!");
+        }
         String randomUUID = UUID.randomUUID().toString().replaceAll("[^0-9]", "");
         String uniqueId = randomUUID.substring(0, 4);
         room.setRoomId("r-"+uniqueId);
-        return mongoTemplate.save(room, "Room");
+        return roomDao.create(room);
     }
-    /**
-     * Adds users to a room by updating the list of users in the room.
-     *
-     * @param users  List of users to be added to the room.
-     * @param roomId The ID of the room where users will be added.
-     * @return The updated Room object after adding the users.
-     * @throws IllegalArgumentException if the roomId is invalid or the room is not found.
-     */
+
     public Room addUserToRoom(List<User> users, String roomId) {
         log.info("Starting process to add users to room with ID: {}", roomId);
         if(StringUtil.isNullOrEmpty(roomId)) {
-            throw new IllegalArgumentException("Invalid roomId");
+            throw new InvalidInputException("RoomId can not be NULL or EMPTY!");
         }
-        Query query = new Query();
-        query.addCriteria(Criteria.where("roomId").is(roomId));
-        Room room = mongoTemplate.findOne(query, Room.class);
-        if(room == null) {
-            log.error("Room with ID: {} not found", roomId);
-            throw new IllegalArgumentException("Room not found for ID: "+roomId);
-        }
-
-        room.setUsers(users);
-        Update update = new Update();
-        update.addToSet("users", room.getUsers());
-        return mongoTemplate.findAndModify(query, update, Room.class);
+        return roomDao.addUser(roomId, users);
     }
 
     public Room getRoomById(String roomId) {
         log.info("Finding room by ID: {}", roomId);
         if(StringUtil.isNullOrEmpty(roomId)) {
             log.error("Invalid roomId: {}", roomId);
-            throw new IllegalArgumentException("Invalid roomId");
+            throw new InvalidInputException("RoomId can not be NULL or EMPTY!");
         }
-        Query query = new Query();
-        query.addCriteria(Criteria.where("roomId").is(roomId));
-        return mongoTemplate.findOne(query, Room.class, "Room");
-    }
-    public List<Room> getAll() {
-        return mongoTemplate.findAll(Room.class, "Room");
+       return roomDao.getRoomById(roomId);
     }
 
+
+    public ResponseEntity<String> settle(String roomId) {
+        // log the expenses and remove them from the room
+        log.info("Settling expenses for -> {}", roomId);
+        Room room = roomDao.getRoomById(roomId);
+        if(room == null) {
+            throw new NotFoundException("Room not found!");
+        }
+        List<Expense> expenseList = expenseDao.getAllExpenseofRoom(roomId);
+        log.info("List of expense -> {}", expenseList);
+        for (Expense expense : expenseList) {
+            String deleted_result = expenseDao.settleDebt(expense.getExpenseId());
+            log.info("DELETED RESULT -> {}", deleted_result);
+        }
+        return ResponseEntity.ok("Settled!");
+    }
 }
