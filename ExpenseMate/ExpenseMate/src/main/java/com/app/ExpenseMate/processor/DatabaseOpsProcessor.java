@@ -76,4 +76,16 @@ public class DatabaseOpsProcessor {
         }
         return ResponseEntity.ok("Settled!");
     }
+    public ResponseEntity<List<Expense>> getExpense(String roomId) {
+        log.info("[GET] expense for roomId -> {}", roomId);
+        Room room = roomDao.getRoomById(roomId);
+        if(room == null) {
+            throw new NotFoundException("Invalid roomId!");
+        }
+        List<Expense> expenseList = expenseDao.getAllExpenseofRoom(roomId);
+        if(expenseList.isEmpty()) {
+            throw new NotFoundException("No expenses found!");
+        }
+        return ResponseEntity.ok(expenseList);
+    }
 }

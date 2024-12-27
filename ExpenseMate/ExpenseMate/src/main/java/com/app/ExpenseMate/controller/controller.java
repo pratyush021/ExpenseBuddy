@@ -16,7 +16,7 @@ public class controller {
     @Autowired
     private DatabaseOpsProcessor databaseOpsProcessor;
 
-    @PostMapping("/room")
+    @PostMapping("/room/create")
     public ResponseEntity<Room> createRoom(
             @RequestBody Room room
     ) {
@@ -50,11 +50,17 @@ public class controller {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/room")
+    @PostMapping("/room/settle")
     public ResponseEntity<String> settleExpenses(
             @RequestParam(value = "roomId") String roomId
     ) {
         return databaseOpsProcessor.settle(roomId);
+    }
+    @GetMapping("/expense")
+    public ResponseEntity<List<Expense>> getExpense(
+        @RequestParam(value = "roomId") String roomId
+    ) {
+        return databaseOpsProcessor.getExpense(roomId);
     }
 
 }

@@ -10,9 +10,11 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 @Slf4j
+@Repository
 public class RoomDaoImpl implements RoomDao {
 
     @Autowired
