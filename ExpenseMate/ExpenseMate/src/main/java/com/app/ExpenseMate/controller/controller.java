@@ -62,5 +62,8 @@ public class controller {
     ) {
         return databaseOpsProcessor.getExpense(roomId);
     }
+    // need these UI endpoints
+    // get all users (?)
+    // get user by phone number or email
 
 }

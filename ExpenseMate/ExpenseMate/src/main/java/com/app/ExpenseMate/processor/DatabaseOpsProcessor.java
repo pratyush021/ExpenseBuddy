@@ -26,12 +26,25 @@ public class DatabaseOpsProcessor {
     @Autowired
     private ExpenseDao expenseDao;
 
+    /**
+     * Adds an expense to a specified room.
+     *
+     * @param expense the expense to be added
+     * @param roomId the ID of the room to which the expense will be added
+     * @return the ID of the added expense
+     */
     public String addExpense(Expense expense, String roomId) {
         log.info("[POST] adding expense to room {}", roomId);
+        expenseDao.addExpense(expense, roomId);
         return expense.getExpenseId();
     }
-
-
+    /**
+     * Creates a new room.
+     *
+     * @param room the room to be created
+     * @return the created room
+     * @throws InvalidInputException if the room name is null or empty
+     */
     public Room createNewRoom(Room room) {
         log.info("[POST] adding room " + room.getRoomId() + " by " + room.getCreatedBy());
         if(StringUtil.isNullOrEmpty(room.getRoomName())) {
@@ -76,6 +89,7 @@ public class DatabaseOpsProcessor {
         }
         return ResponseEntity.ok("Settled!");
     }
+
     public ResponseEntity<List<Expense>> getExpense(String roomId) {
         log.info("[GET] expense for roomId -> {}", roomId);
         Room room = roomDao.getRoomById(roomId);

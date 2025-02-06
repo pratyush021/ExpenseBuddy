@@ -28,7 +28,7 @@ public class RoomDaoImpl implements RoomDao {
     @Override
     public Room addUser(String roomId, List<User> userList) {
         Query query = new Query();
-        query.addCriteria(Criteria.where("roomId").is(roomId));
+        query.addCriteria(Criteria.where("_id").is(roomId));
         Room room = mongoTemplate.findOne(query, Room.class);
         if(room == null) {
             log.error("Room with ID: {} not found", roomId);
@@ -43,7 +43,7 @@ public class RoomDaoImpl implements RoomDao {
     @Override
     public Room getRoomById(String roomId) {
         Query query = new Query();
-        query.addCriteria(Criteria.where("roomId").is(roomId));
+        query.addCriteria(Criteria.where("_id").is(roomId));
         return mongoTemplate.findOne(query, Room.class, "Room");
     }
 }
