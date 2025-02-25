@@ -46,4 +46,10 @@ public class RoomDaoImpl implements RoomDao {
         query.addCriteria(Criteria.where("_id").is(roomId));
         return mongoTemplate.findOne(query, Room.class, "Room");
     }
+
+
+    @Override
+    public List<Room> getAllRoom() {
+        return mongoTemplate.findAll(Room.class);
+    }
 }

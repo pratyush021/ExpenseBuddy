@@ -4,9 +4,11 @@ import ResponsiveAppBar from './components/Drawer';
 
 function App() {
   return (
-    <div>
+    <div className='row'>
 
-      <ResponsiveAppBar></ResponsiveAppBar>
+      {/* <ResponsiveAppBar></ResponsiveAppBar> */}
+      <div className='col'>test </div>
+      <div className='col'>test 2</div>    
     </div>
   );
 }

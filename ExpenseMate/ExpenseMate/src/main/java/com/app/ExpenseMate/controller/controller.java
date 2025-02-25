@@ -64,6 +64,22 @@ public class controller {
     }
     // need these UI endpoints
     // get all users (?)
+    @GetMapping("/users")
+    public ResponseEntity<List<User>> getAllUsers() {
+        return databaseOpsProcessor.getAllUsers();
+    }
     // get user by phone number or email
+    @GetMapping("/users")
+    public ResponseEntity<User> getUserByPhoneOrEmail(
+            @RequestParam(value = "email") String email,
+            @RequestParam(value = "phoneNumber") String phoneNumber
+    ) {
+        return databaseOpsProcessor.findUserByPhoneOrEmail(email, phoneNumber);
+    }
+    // get all rooms
+    @GetMapping("/room/all")
+    public ResponseEntity<List<Room>> getAllRoom() {
+        return databaseOpsProcessor.getAllRooms();
+    }
 
 }
